@@ -10,7 +10,7 @@
         <module name="Mixi-server" />
         <module name="Mixi-gateway-app" />
         <module name="Mixi-user" />
-        <module name="Mixi-AudoVideo" />
+        <module name="Mixi-audioVideo" />
         <module name="Mixi-webRoom" />
         <module name="Mixi-gateway-config" />
         <module name="Mixi-gateway-infrastructure" />
@@ -18,9 +18,13 @@
         <module name="Mixi-common" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="Mixi-AudoVideo" target="11" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Mixi-audioVideo" options="-parameters" />
       <module name="Mixi-common" options="-parameters" />
       <module name="Mixi-gateway-app" options="-parameters" />
       <module name="Mixi-gateway-config" options="-parameters" />

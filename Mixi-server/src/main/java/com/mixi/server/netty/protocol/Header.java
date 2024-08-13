@@ -38,7 +38,7 @@ public class Header {
 
     public int calculateTotalLength() {
         int dataLength = calculateDataLength();
-        return 1+ VarInt.computeVarInt32Size(dataLength)+dataLength;
+        return 1 + VarInt.computeVarInt32Size(dataLength)+dataLength;
     }
 
     public int calculateDataLength(){

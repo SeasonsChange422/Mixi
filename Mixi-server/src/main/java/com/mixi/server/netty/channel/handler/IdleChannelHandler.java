@@ -105,7 +105,6 @@ public class IdleChannelHandler extends AbstractChannelHandler{
             handler.receive(channel, message);
             return;
         }
-        log.info("The connection of {} -> {} ack heartbeat message, channelId={}", channel.getRemoteAddress(), channel.getLocalAddress(), channel.getChannelId());
         channel.send(AccessMessageUtils.createHeartResponse());
     }
 }

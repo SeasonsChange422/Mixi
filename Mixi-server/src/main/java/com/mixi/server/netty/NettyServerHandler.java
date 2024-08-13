@@ -57,7 +57,6 @@ public class NettyServerHandler extends ChannelDuplexHandler {
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         super.write(ctx, msg, promise);
         MixiNettyChannel channel = MixiNettyChannel.registerChannelIfAbsent(ctx.channel());
-        log.info("The connection of {} -> {} is writing, channelId={}", channel.getRemoteAddress(), channel.getLocalAddress(), channel.getChannelId());
         handler.send(channel, msg);
     }
 
