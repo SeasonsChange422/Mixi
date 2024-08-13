@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @Description
@@ -66,6 +65,7 @@ public class RoomChannelManager {
         }
         channel.getAttrs().setEnter(true);
         channel.getAttrs().getRooms().add(roomName);
+        MixiNettyChannel.addChannel(uid,channel);
         return true;
     }
 

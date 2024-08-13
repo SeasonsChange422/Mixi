@@ -60,11 +60,10 @@ public class TestMessageCodec {
 
                 @Override
                 public void onMessage(ByteBuffer message) {
-
                     ByteBuf byteBuf = Unpooled.wrappedBuffer(message);
                     AccessMessage decode = MessageCodec.decode(byteBuf);
                     String s = new String(decode.getBody(), StandardCharsets.UTF_8);
-                    System.out.println("client "+"Received ByteBuffer message: "+decode+s);
+                    System.out.println("client "+"Received ByteBuffer message: "+decode);
                     System.out.println(s);
                 }
 
@@ -97,7 +96,6 @@ public class TestMessageCodec {
 
                 @Override
                 public void onMessage(ByteBuffer message) {
-
                     ByteBuf byteBuf = Unpooled.wrappedBuffer(message);
                     AccessMessage decode = MessageCodec.decode(byteBuf);
                     String body = new String(decode.getBody(),StandardCharsets.UTF_8);
@@ -118,15 +116,15 @@ public class TestMessageCodec {
             client.connect();
             Thread.sleep(10000);
             client1.connect();
-            byte[] message = AccessMessageEncoder.roomMessage(123,12,"我觉得柳州螺蛳粉大于株洲螺蛳粉");
+            byte[] message = AccessMessageEncoder.roomMessage(123,12,"boss您好，我是25届计算机专业毕业生韦俊勇。在校期间层参与多个开源项目，其中一个项目已经拥有700+star，并且该项目被邀请参加奇绩创坛创业营。同时，我还荣获多项国家级、省级及以上编程竞赛奖项。除此之外，我也具备扎实的Java基础、数据结构、微服务开发、计算机网络等必备专业知识，也具有一定的团队协作开发能力和经验。 我对贵公司Java开发工程师的职位非常感兴趣，希望有机会深入了解，如果您想了解更多，请查看我的简历或者与我沟通。");
             // Send the message
             ByteBuffer buffer = ByteBuffer.wrap(message);
             Thread.sleep(1000);
             client.send(buffer);
             Thread.sleep(500);
-            byte[] message1 = AccessMessageEncoder.roomMessage(1234,12,"我同意");
-            ByteBuffer buffer1 = ByteBuffer.wrap(message1);
-            client1.send(buffer1);
+//            byte[] message1 = AccessMessageEncoder.roomMessage(1234,12,"asdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd");
+//            ByteBuffer buffer1 = ByteBuffer.wrap(message1);
+//            client1.send(buffer1);
         } catch (Exception e) {
             e.printStackTrace();
         }

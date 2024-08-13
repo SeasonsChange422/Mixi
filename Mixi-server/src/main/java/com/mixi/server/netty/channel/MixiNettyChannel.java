@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -22,6 +23,7 @@ public class MixiNettyChannel implements MixiChannelManager{
 
     private static final Logger log = LoggerFactory.getLogger(MixiNettyChannel.class);
     private static final ConcurrentHashMap<String, MixiNettyChannel> CHANNEL_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String,MixiNettyChannel> UID_CHANNEL_MAP = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String,Object> attributes = new ConcurrentHashMap<>();
     private Channel channel;
     private boolean close;
@@ -45,10 +47,21 @@ public class MixiNettyChannel implements MixiChannelManager{
         return nettyChannel;
     }
 
-    public static void removeChannel(@NonNull Channel channel) {
-        MixiNettyChannel nettyChannel = CHANNEL_MAP.remove(ChannelAttrs.getChannelId(channel));
+    public static MixiNettyChannel getChannelByUid(String uid){
+        return UID_CHANNEL_MAP.get(uid);
     }
 
+    public static void addChannel(String uid,MixiNettyChannel channel){
+        UID_CHANNEL_MAP.put(uid,channel);
+    }
+
+    public static void removeChannel(@NonNull Channel channel) {
+        MixiNettyChannel nettyChannel = CHANNEL_MAP.remove(Objects.requireNonNull(ChannelAttrs.getChannelId(channel)));
+    }
+
+    public static void removeChannel(String uid){
+        UID_CHANNEL_MAP.remove(uid);
+    }
     public static Collection<MixiNettyChannel> getAllChannels() {
         return CHANNEL_MAP.values();
     }
