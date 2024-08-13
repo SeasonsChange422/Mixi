@@ -1,7 +1,7 @@
 <!--
  * @Author: Dhx
  * @Date: 2024-07-28 17:18:12
- * @Description: 
+ * @Description:
  * @FilePath: \Mixi\Mixi-ui\src\views\demo\Room.vue
 -->
 <template>
@@ -43,7 +43,7 @@
 <script lang="ts" setup>
 import { shareApi, pullApi, quitApi } from '@/api/room/roomApi'
 import MixiWebSocket from '@/util/webSocket';
-import {joinRoomMessage,chatMessage,decodeRemoteMessage} from '@/util/socketMessage'
+import {joinRoomMessage,chatMessage,decodeRemoteMessage, heartBeatMessage} from '@/util/socketMessage'
 import { onMounted } from 'vue';
 import { ref } from 'vue';
 import Bytes from '@/util/byteUtil'
@@ -70,7 +70,7 @@ const inviteFunc = () => {
 }
 const quitRoom = () => {
     quitApi().then((res:any)=>{
-        
+
     })
 }
 const share = () => {
@@ -96,12 +96,15 @@ const socket = new MixiWebSocket('ws://localhost:8090/chat')
 socket.onopen(() => {
     storage.set('uid',uid)
     socket.send(joinRoomMessage({roomId:123,uid:uid}))
+    setInterval(()=>{
+        socket.send(heartBeatMessage())
+    },5000)
 })
 socket.onmessage((event: any) => {
     let data:Blob = event.data
     data.text().then((res:any)=>{
         let msg:any = decodeRemoteMessage(new Bytes(res))
-        if(msg.body.code == 200)return
+        if(msg.body.code == 200||(msg.body=="",msg.headers.length==0))return
         messageArray.value.push(msg)
         console.log(messageArray.value)
     })

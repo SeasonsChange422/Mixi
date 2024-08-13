@@ -1,7 +1,7 @@
 /*
  * @Author: Dhx
  * @Date: 2024-07-28 18:47:52
- * @Description: 
+ * @Description:
  * @FilePath: \Mixi\Mixi-ui\src\util\wsProtocol.ts
  */
 import Bytes from '@/util/byteUtil'
@@ -52,7 +52,6 @@ class SocketProtocol {
         }
     }
     private decode_v1(bytes:Bytes){
-        console.log(bytes.buffer())
         this.version = bytes.readNumber(1)
         this.isHeartBeat = bytes.readBoolean()
         this.command = bytes.readNumber(1)
@@ -65,6 +64,7 @@ class SocketProtocol {
                 console.error('error')
                 return null
             }
+            console.log(headerDataLength)
             let str = bytes.readString(headerDataLength)
             console.log(str)
             const header = JSON.parse(str)
@@ -80,25 +80,86 @@ class SocketProtocol {
         }
     }
     private encode_v1(){
-        const headerBytes = new Bytes('')
+        let headerLen = 0;
         for(let i=0;i<this.headers.length;i++){
-            headerBytes.writeVarInt(this.headers[i].data.length)
-            headerBytes.write8bitsData(this.headers[i].type)
-            headerBytes.writeString(this.headers[i].data)
+            headerLen+=1+computeVarIntSize(this.headers[i].data.length)+this.headers[i].data.length;
         }
-        const bodyBytes = new Bytes('')
-        bodyBytes.writeString(this.body)
-        const messageLen:number = headerBytes.length() + bodyBytes.length()
-        const ret = new Bytes('');
-        ret.write8bitsData(VERSION_1)
-        ret.write8bitsData(this.isHeartBeat)
-        ret.write8bitsData(this.command)
-        ret.writeVarInt(messageLen)
-        ret.write8bitsData(this.headers.length)
-        ret.writeBytes(headerBytes)
-        ret.writeBytes(bodyBytes)
-        return ret.buffer()
+        var bodyLen = convertToUTF8Array(new TextEncoder().encode(this.body));
+        var messageLen = headerLen + bodyLen.length
+        var view = new DataView(new ArrayBuffer(8+this.headers.length+messageLen));
+        console.log(view.byteLength)
+        console.log(this.headers.length)
+        console.log(messageLen)
+        console.log(headerLen)
+        console.log(bodyLen.length)
+        let offset = 1;
+        view.setInt8(offset++,VERSION_1);
+        view.setInt8(offset++,this.isHeartBeat?1:0);
+        view.setInt8(offset++,this.command);
+        if(this.isHeartBeat)
+            return view;
+        offset = writeVarInt(messageLen,view,offset);
+        view.setInt8(offset++,this.headers.length);
+        for(let i=0;i<this.headers.length;i++){
+            const headerData = convertToUTF8Array(new TextEncoder().encode(this.headers[i].data));
+            offset = writeVarInt(headerData.length,view,offset);
+            view.setInt8(offset++,this.headers[i].type);
+            offset = writeByteArrayToView(headerData,view,offset);
+        }
+        if(bodyLen.length!=0){
+            offset = writeByteArrayToView(bodyLen,view,offset);
+        }
+        printDataView(view)
+        return view;
     }
 }
 export { SocketProtocol };
 export type { SocketHeader };
+function printDataView(view) {
+    const byteArray = [];
+    for (let i = 0; i < view.byteLength; i++) {
+        byteArray.push(view.getInt8(i));
+    }
+    console.log(byteArray);
+}
+function writeByteArrayToView(bytes,view,offset){
+    bytes.forEach((v)=>{
+        offset++;
+        view.setInt8(offset,v);
+    })
+    return 1+offset;
+}
+
+function convertToUTF8Array(bytes){
+    const res = new Int8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) {
+        let value = bytes[i];
+        // 将值调整到-128到127的范围
+        res[i] = (value > 127) ? (value - 256) : value;
+    }
+    return res;
+}
+function writeVarInt(data,view,offset) {
+    while (true) {
+        if ((data & ~0x7F) == 0) {
+            view.setInt8(offset++,data)
+            break;
+        } else {
+            view.setUint8(offset++, (data & 0x7F) | 0x80);
+            data >>>= 7;
+        }
+    }
+    return offset;
+}
+
+function computeVarIntSize(value) {
+    let i;
+    for (i = 1; i < 5; i++) {
+        // 创建一个掩码，该掩码将用于检查前 i 个字节的位
+        const mask = 0xFFFFFFFF << (7 * i);
+        if ((value & mask) === 0) {
+            return i;
+        }
+    }
+    return i;
+}

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -41,7 +42,6 @@ public class MessageCodec {
         VarInt.writeVarInt32(buf, msg.getLength());
 
         buf.writeByte(headerCount);
-
         for (int i = 0; i < headerCount; i++) {
             Header header = headers.get(i);
             VarInt.writeVarInt32(buf, header.calculateDataLength());
@@ -52,10 +52,15 @@ public class MessageCodec {
         if (bodyLength != 0) {
             buf.writeBytes(body);
         }
+
     }
 
     public static AccessMessage decode(ByteBuf buf) {
+        byte[] bytes = new byte[buf.readableBytes()];
+        buf.getBytes(buf.readerIndex(),bytes);
+        log.info(Arrays.toString(bytes));
         AccessMessage msg = new AccessMessage();
+        buf.readByte();
         try {
             msg.setVersion(buf.readByte());
             msg.setHeartBeat(buf.readBoolean());
@@ -70,18 +75,18 @@ public class MessageCodec {
             for (int i = 0; i < headerCount; i++) {
                 int headerLength = VarInt.readVarInt32(buf);
                 int headerType = buf.readByte();
-                if(buf.readableBytes()<headerLength){
-                    //todo: 抛异常
-                }
+                buf.readByte();
                 Header header = new Header(headerType, BytesUtils.getFromBuf(buf, headerLength));
                 headers.add(header);
                 totalLength-=header.calculateTotalLength();
             }
+
             msg.setHeaders(headers);
+            buf.readByte();
             byte[] body = BytesUtils.getFromBuf(buf, totalLength);
             msg.setBody(body);
         }catch (Exception e){
-            log.error("msg decoder failed!");
+            log.error("msg decoder failed:{}",e.getMessage());
             //todo: 抛异常
         }
         return msg;

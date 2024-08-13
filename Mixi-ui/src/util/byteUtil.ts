@@ -1,9 +1,7 @@
-import type { Type } from "typescript"
-
 /*
  * @Author: Dhx
  * @Date: 2024-07-30 21:22:13
- * @Description: 
+ * @Description:
  * @FilePath: \Mixi\Mixi-ui\src\util\byteUtil.ts
  */
 export default class Bytes {
@@ -33,7 +31,6 @@ export default class Bytes {
                 break;
             }
             default: {
-
                 break;
             }
         }
@@ -86,37 +83,19 @@ export default class Bytes {
         return ret.value
     }
     readVarInt() {
-        if(this.data.length==0)return 0
-        let res:number = 0
-        let shift:number = 0
-        for(let i=0;i<5;i++){
-            const tmp:string = this.readString(1)
-            res|=(tmp.charCodeAt(0)&127)<<shift
-            if(tmp.charCodeAt(0)>=0)return res
-            shift+=7
+        if(this.data.length == 0) return 0;
+        let res: number = 0;
+        let shift: number = 0;
+        for(let i = 0; i < 5; i++) {
+            const tmp: string = this.readString(1);
+            const byteValue = tmp.charCodeAt(0);
+            res |= (byteValue & 127) << shift;
+            if (!(byteValue & 0x80)) return res;
+            shift += 7;
         }
-        return 0
+        return 0;
     }
-    writeVarInt(data: number) {
-        let test = ''
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            if ((data & ~0x7F) == 0) {
-                this.write8bitsData(data);
-                test+=data
-                for(let i=0;i<test.length;i++){
-                    console.log(test.charCodeAt(i))
-                }
-                console.log('bbb')
-                return;
-            } else {
-                this.write8bitsData((data & 0x7F) | 0x80);
-                data >>>= 7;
-                test+=(data & 0x7F) | 0x80
-            }
-        }
 
-    }
     computeVarInt32Size(value:number) {
         let i;
         for(i=1;i<5;i++){
@@ -131,13 +110,15 @@ export default class Bytes {
         return this.data.length
     }
     buffer() {
-        let array = new Uint8Array(this.data.length)
+        let array = new Int8Array(this.data.length)
         for (let i = 0; i < this.data.length; i++) {
             // console.log(this.data.charCodeAt(i))
-            array[i] = (this.data.charCodeAt(i))
+            array[i] = this.data.charCodeAt(i)
         }
         return array.buffer
     }
+
+
     toString() {
         return this.data
     }

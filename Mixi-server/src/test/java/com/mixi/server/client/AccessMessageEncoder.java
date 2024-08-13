@@ -5,6 +5,7 @@ import com.mixi.server.netty.protocol.ChatroomMsg;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class AccessMessageEncoder {
@@ -78,7 +79,6 @@ public class AccessMessageEncoder {
         }
 
         buf.put(body);
-
         buf.flip();
         byte[] byteArray = new byte[buf.remaining()];
         buf.get(byteArray);

@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
+import java.nio.charset.StandardCharsets;
+
 import static com.mixi.server.netty.protocol.AccessResponse.*;
 
 /**
@@ -39,6 +41,7 @@ public class ChatRoomHandler extends MixiAbstractHandler {
     @Override
     protected Object doHandle(MixiNettyChannel channel, AccessMessage message) {
         String header = AccessMessageUtils.extractHeaderData(message, HeaderEnum.CHATROOM);
+        log.info(header);
         JSONObject jsonObject = JSON.parseObject(header);
         String roomId = jsonObject.getString(Constants.CHATROOM_ID);
         if(StringUtils.isBlank(roomId)){
@@ -96,9 +99,11 @@ public class ChatRoomHandler extends MixiAbstractHandler {
             return INVALID_USER_UID;
         }
         String roomId = headerObj.getString(Constants.CHATROOM_ID);
-        String body = new String(message.getBody());
+        String body = new String(message.getBody(), StandardCharsets.UTF_8);
+        log.info("body:{}",body);
         ChatroomMsg request = JSON.parseObject(body, ChatroomMsg.class);
         //发送消息
+        log.info("send msg:{}",request);
         TimelineMessage timelineMessage = convertMsgToTimeline(message, roomId, attrs.getUid());
         timelineMessage.setContent(request.getContent());
         timeline.push(timelineMessage,channel.getChannelId());

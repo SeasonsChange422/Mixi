@@ -1,5 +1,6 @@
 package com.mixi.server.util;
 
+import com.alibaba.fastjson.JSON;
 import com.mixi.server.common.Constants;
 import com.mixi.server.netty.protocol.AccessMessage;
 import com.mixi.server.netty.protocol.ChatroomMsg;
@@ -28,11 +29,11 @@ public class AccessMessageUtils {
 
     public static AccessMessage createChatRoomResponse(ChatroomMsg chatroomMsg){
         AccessMessage message = new AccessMessage();
-        byte[] body = SerializationUtils.serialize(chatroomMsg);
+        byte[] body = JSON.toJSONBytes(chatroomMsg);
         message.setBody(body);
         message.setCmd(12);
         message.setVersion(1);
-        Header header = new Header(HeaderEnum.CHATROOM.getType(), SerializationUtils.serialize(Map.of(Constants.CHATROOM_ID,chatroomMsg.getRoomId(),Constants.CHATROOM_UID,chatroomMsg.getFromUid())));
+        Header header = new Header(HeaderEnum.CHATROOM.getType(), JSON.toJSONBytes(Map.of(Constants.CHATROOM_ID,chatroomMsg.getRoomId(),Constants.CHATROOM_UID,chatroomMsg.getFromUid())));
         message.setHeaders(List.of(header));
         return message;
     }

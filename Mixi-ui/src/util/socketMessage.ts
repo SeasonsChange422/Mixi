@@ -1,7 +1,7 @@
 /*
  * @Author: Dhx
  * @Date: 2024-07-31 01:01:53
- * @Description: 
+ * @Description:
  * @FilePath: \Mixi\Mixi-ui\src\util\socketMessage.ts
  */
 import {SocketProtocol,type SocketHeader} from '@/util/wsProtocol'
@@ -15,7 +15,7 @@ const HEADER_CMD_JOIN = 0x0a
 const HEADER_CMD_MESSAGE = 0x0c
 
 function heartBeatMessage() {
-
+    return new SocketProtocol(VERSION_1,true,CMD_1,[],"").encodeMessage()!
 }
 function joinRoomMessage(msg:{roomId:number,uid:number}){
     const header:SocketHeader = {
