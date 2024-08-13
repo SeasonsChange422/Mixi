@@ -80,6 +80,7 @@ public class MessageCodec {
                 headers.add(header);
                 totalLength-=header.calculateTotalLength();
             }
+
             msg.setHeaders(headers);
             buf.readByte();
             byte[] body = BytesUtils.getFromBuf(buf, totalLength);
